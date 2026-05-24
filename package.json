@@ -1,0 +1,23 @@
+{
+  "name": "omniroute-model-syncer",
+  "version": "1.0.0",
+  "description": "Interactive & CLI-based OmniRoute model syncer for OpenClaw/OpenCode",
+  "type": "module",
+  "main": "sync-interactive.js",
+  "scripts": {
+    "sync": "node sync-interactive.js"
+  },
+  "keywords": [
+    "omniroute",
+    "openclaw",
+    "opencode",
+    "llm",
+    "models"
+  ],
+  "dependencies": {
+    "inquirer": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
