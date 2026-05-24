@@ -79,11 +79,11 @@ function isAlias(modelId) {
 
 function renameModelId(id, isCombo) {
   if (isCombo) {
-    return `or-combo-${id}`;
+    return `or/combo/${id}`;
   }
   const provider = id.includes("/") ? id.split("/")[0] : "misc";
   const modelName = id.includes("/") ? id.substring(id.indexOf("/") + 1) : id;
-  return `or-${provider}-${modelName}`;
+  return `or/${provider}/${modelName}`;
 }
 
 function isFreeTierModel(modelId) {
