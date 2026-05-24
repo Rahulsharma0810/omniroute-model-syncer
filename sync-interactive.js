@@ -472,6 +472,16 @@ async function syncInteractive() {
         models: totalModels,
       };
 
+      // Update agents.defaults.models to include all synced models (whitelist for dropdown)
+      if (!openclaw_config.agents) openclaw_config.agents = {};
+      if (!openclaw_config.agents.defaults) openclaw_config.agents.defaults = {};
+      if (!openclaw_config.agents.defaults.models) openclaw_config.agents.defaults.models = {};
+
+      totalModels.forEach((m) => {
+        const modelRef = `omniroute/${m.id}`;
+        openclaw_config.agents.defaults.models[modelRef] = {};
+      });
+
       writeFileSync(openclaw_path, JSON.stringify(openclaw_config, null, 2) + "\n");
       console.log(`✅ OpenClaw: ${totalModels.length} models`);
       console.log(`   Backup: ${backupPath}`);
@@ -496,6 +506,16 @@ async function syncInteractive() {
         api: "openai-completions",
         models: totalModels,
       };
+
+      // Update agents.defaults.models to include all synced models (whitelist for dropdown)
+      if (!opencode_config.agents) opencode_config.agents = {};
+      if (!opencode_config.agents.defaults) opencode_config.agents.defaults = {};
+      if (!opencode_config.agents.defaults.models) opencode_config.agents.defaults.models = {};
+
+      totalModels.forEach((m) => {
+        const modelRef = `omniroute/${m.id}`;
+        opencode_config.agents.defaults.models[modelRef] = {};
+      });
 
       writeFileSync(
         opencode_path,
@@ -523,6 +543,7 @@ async function syncInteractive() {
       if (!agent_config.agents) agent_config.agents = {};
       if (!agent_config.agents.defaults) agent_config.agents.defaults = {};
       if (!agent_config.agents.defaults.model) agent_config.agents.defaults.model = {};
+      if (!agent_config.agents.defaults.models) agent_config.agents.defaults.models = {};
 
       // Update omniroute provider
       const apiKey = auth.omniroute?.key;
@@ -537,6 +558,12 @@ async function syncInteractive() {
       if (!agent_config.agents.defaults.model.primary) {
         agent_config.agents.defaults.model.primary = "omniroute/cost-saver";
       }
+
+      // Update agents.defaults.models to include all synced models (whitelist for dropdown)
+      totalModels.forEach((m) => {
+        const modelRef = `omniroute/${m.id}`;
+        agent_config.agents.defaults.models[modelRef] = {};
+      });
 
       writeFileSync(
         agent_models_path,
