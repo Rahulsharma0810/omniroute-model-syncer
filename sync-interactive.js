@@ -405,6 +405,7 @@ async function syncInteractive() {
     // Get config paths
     const openclaw_path = join(homedir(), ".openclaw/openclaw.json");
     const opencode_path = join(homedir(), ".config/opencode/opencode.json");
+    const agent_models_path = join(homedir(), ".openclaw/agents/main/agent/models.json");
 
     const targets = {
       openclaw: target === "openclaw" || target === "both",
@@ -414,6 +415,18 @@ async function syncInteractive() {
     const targetPaths = [];
     if (targets.openclaw) targetPaths.push(openclaw_path);
     if (targets.opencode) targetPaths.push(opencode_path);
+
+    // Auto-sync to agent if openclaw is target and agent exists
+    let syncAgent = false;
+    try {
+      readFileSync(agent_models_path, "utf-8");
+      if (targets.openclaw) {
+        syncAgent = true;
+        targetPaths.push(agent_models_path);
+      }
+    } catch (e) {
+      // agent models.json doesn't exist, skip
+    }
 
     // PROMPT 4: Confirm (skip in CLI mode)
     let confirm = true;
@@ -491,6 +504,34 @@ async function syncInteractive() {
       console.log(`✅ OpenCode: ${totalModels.length} models`);
       console.log(`   Backup: ${backupPath}`);
       written.push("opencode");
+    }
+
+    if (syncAgent) {
+      const agent_config = JSON.parse(
+        readFileSync(agent_models_path, "utf-8")
+      );
+      const backupPath = `${agent_models_path}.bak`;
+      writeFileSync(backupPath, readFileSync(agent_models_path, "utf-8"));
+
+      if (!agent_config.models) agent_config.models = {};
+      if (!agent_config.models.providers)
+        agent_config.models.providers = {};
+
+      const apiKey = auth.omniroute?.key;
+      agent_config.models.providers.omniroute = {
+        baseUrl: "http://192.168.0.51:20128/v1",
+        apiKey: apiKey,
+        api: "openai-completions",
+        models: totalModels,
+      };
+
+      writeFileSync(
+        agent_models_path,
+        JSON.stringify(agent_config, null, 2) + "\n"
+      );
+      console.log(`✅ Agent: ${totalModels.length} models`);
+      console.log(`   Backup: ${backupPath}`);
+      written.push("agent");
     }
 
     console.log(`\n✨ Done! Synced to ${written.join(" + ")}`);
