@@ -507,15 +507,24 @@ async function syncInteractive() {
     }
 
     if (syncAgent) {
-      const agent_config = JSON.parse(
-        readFileSync(agent_models_path, "utf-8")
-      );
+      let agent_config;
+      try {
+        agent_config = JSON.parse(readFileSync(agent_models_path, "utf-8"));
+      } catch (e) {
+        agent_config = {};
+      }
+
       const backupPath = `${agent_models_path}.bak`;
       writeFileSync(backupPath, readFileSync(agent_models_path, "utf-8"));
 
+      // Ensure correct structure: { models: { providers: { ... } }, agents: { defaults: { ... } } }
       if (!agent_config.models) agent_config.models = {};
       if (!agent_config.models.providers)
         agent_config.models.providers = {};
+
+      if (!agent_config.agents) agent_config.agents = {};
+      if (!agent_config.agents.defaults) agent_config.agents.defaults = {};
+      if (!agent_config.agents.defaults.model) agent_config.agents.defaults.model = {};
 
       const apiKey = auth.omniroute?.key;
       agent_config.models.providers.omniroute = {
@@ -524,6 +533,11 @@ async function syncInteractive() {
         api: "openai-completions",
         models: totalModels,
       };
+
+      // Set omniroute as default if not already set
+      if (!agent_config.agents.defaults.model.primary) {
+        agent_config.agents.defaults.model.primary = "omniroute/cost-saver";
+      }
 
       writeFileSync(
         agent_models_path,
