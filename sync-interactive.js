@@ -79,11 +79,11 @@ function isAlias(modelId) {
 
 function renameModelId(id, isCombo) {
   if (isCombo) {
-    return `or/combo/${id}`;
+    return `or-combo-${id}`;
   }
   const provider = id.includes("/") ? id.split("/")[0] : "misc";
   const modelName = id.includes("/") ? id.substring(id.indexOf("/") + 1) : id;
-  return `or/${provider}/${modelName}`;
+  return `or-${provider}-${modelName}`;
 }
 
 function isFreeTierModel(modelId) {
@@ -510,27 +510,20 @@ async function syncInteractive() {
       if (!opencode_config.models.providers)
         opencode_config.models.providers = {};
 
-      // OpenCode uses omniroute/ format (not or/)
-      const opencodeModels = totalModels.map((m) => ({
-        id: m.id.replace(/^or\//, "omniroute/"),
-        name: m.name,
-      }));
-
       const apiKey = auth.omniroute?.key;
       opencode_config.models.providers.omniroute = {
         baseUrl: "http://192.168.0.51:20128/v1",
         apiKey: apiKey,
         api: "openai-completions",
-        models: opencodeModels,
+        models: totalModels,
       };
 
       // Update agents.defaults.models to include all synced models (whitelist for dropdown)
-      // OpenCode uses omniroute/ format
       if (!opencode_config.agents) opencode_config.agents = {};
       if (!opencode_config.agents.defaults) opencode_config.agents.defaults = {};
       if (!opencode_config.agents.defaults.models) opencode_config.agents.defaults.models = {};
 
-      opencodeModels.forEach((m) => {
+      totalModels.forEach((m) => {
         opencode_config.agents.defaults.models[m.id] = {};
       });
 
