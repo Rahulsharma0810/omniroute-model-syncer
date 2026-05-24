@@ -409,7 +409,10 @@ async function syncInteractive() {
         name: m.name,
       }));
 
-    const totalModels = [...comboModels, ...providerModels];
+    // Sort: combos first (alphabetically), then providers (alphabetically)
+    const sortedCombos = comboModels.sort((a, b) => a.id.localeCompare(b.id));
+    const sortedProviders = providerModels.sort((a, b) => a.id.localeCompare(b.id));
+    const totalModels = [...sortedCombos, ...sortedProviders];
 
     // Get config paths
     const openclaw_path = join(homedir(), ".openclaw/openclaw.json");
