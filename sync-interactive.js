@@ -77,6 +77,15 @@ function isAlias(modelId) {
   return Object.keys(ALIAS_PAIRS).some((alias) => modelId.startsWith(alias));
 }
 
+function renameModelId(id, isCombo) {
+  if (isCombo) {
+    return `or-combo-${id}`;
+  }
+  const provider = id.includes("/") ? id.split("/")[0] : "misc";
+  const modelName = id.includes("/") ? id.substring(id.indexOf("/") + 1) : id;
+  return `or-${provider}-${modelName}`;
+}
+
 function isFreeTierModel(modelId) {
   if (!modelId.startsWith("openrouter/")) {
     return true;
@@ -370,9 +379,9 @@ async function syncInteractive() {
       }
     }
 
-    // Build selected models list
+    // Build selected models list with or- naming convention
     const comboModels = selectedCombos.map((id) => ({
-      id,
+      id: renameModelId(id, true),
       name: id.replace(/^.*\//, ""),
     }));
 
@@ -396,7 +405,7 @@ async function syncInteractive() {
           !m.id.startsWith("premium-")
       )
       .map((m) => ({
-        id: m.id,
+        id: renameModelId(m.id, false),
         name: m.name,
       }));
 
@@ -478,8 +487,7 @@ async function syncInteractive() {
       if (!openclaw_config.agents.defaults.models) openclaw_config.agents.defaults.models = {};
 
       totalModels.forEach((m) => {
-        const modelRef = `omniroute/${m.id}`;
-        openclaw_config.agents.defaults.models[modelRef] = {};
+        openclaw_config.agents.defaults.models[m.id] = {};
       });
 
       writeFileSync(openclaw_path, JSON.stringify(openclaw_config, null, 2) + "\n");
@@ -513,8 +521,7 @@ async function syncInteractive() {
       if (!opencode_config.agents.defaults.models) opencode_config.agents.defaults.models = {};
 
       totalModels.forEach((m) => {
-        const modelRef = `omniroute/${m.id}`;
-        opencode_config.agents.defaults.models[modelRef] = {};
+        opencode_config.agents.defaults.models[m.id] = {};
       });
 
       writeFileSync(
@@ -561,8 +568,7 @@ async function syncInteractive() {
 
       // Update agents.defaults.models to include all synced models (whitelist for dropdown)
       totalModels.forEach((m) => {
-        const modelRef = `omniroute/${m.id}`;
-        agent_config.agents.defaults.models[modelRef] = {};
+        agent_config.agents.defaults.models[m.id] = {};
       });
 
       writeFileSync(
