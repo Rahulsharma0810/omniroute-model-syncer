@@ -518,16 +518,15 @@ async function syncInteractive() {
         agent_config = {};
       }
 
-      // Ensure correct nested structure
-      if (!agent_config.models) agent_config.models = {};
-      if (!agent_config.models.providers) agent_config.models.providers = {};
+      // Agent config uses flat structure: { providers: {...}, agents: {...} }
+      if (!agent_config.providers) agent_config.providers = {};
       if (!agent_config.agents) agent_config.agents = {};
       if (!agent_config.agents.defaults) agent_config.agents.defaults = {};
       if (!agent_config.agents.defaults.model) agent_config.agents.defaults.model = {};
 
       // Update omniroute provider
       const apiKey = auth.omniroute?.key;
-      agent_config.models.providers.omniroute = {
+      agent_config.providers.omniroute = {
         baseUrl: "http://192.168.0.51:20128/v1",
         apiKey: apiKey,
         api: "openai-completions",
