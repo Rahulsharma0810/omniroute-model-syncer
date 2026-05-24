@@ -507,6 +507,10 @@ async function syncInteractive() {
     }
 
     if (syncAgent) {
+      const backupPath = `${agent_models_path}.bak`;
+      writeFileSync(backupPath, readFileSync(agent_models_path, "utf-8"));
+
+      // Read current agent config safely
       let agent_config;
       try {
         agent_config = JSON.parse(readFileSync(agent_models_path, "utf-8"));
@@ -514,18 +518,14 @@ async function syncInteractive() {
         agent_config = {};
       }
 
-      const backupPath = `${agent_models_path}.bak`;
-      writeFileSync(backupPath, readFileSync(agent_models_path, "utf-8"));
-
-      // Ensure correct structure: { models: { providers: { ... } }, agents: { defaults: { ... } } }
+      // Ensure correct nested structure
       if (!agent_config.models) agent_config.models = {};
-      if (!agent_config.models.providers)
-        agent_config.models.providers = {};
-
+      if (!agent_config.models.providers) agent_config.models.providers = {};
       if (!agent_config.agents) agent_config.agents = {};
       if (!agent_config.agents.defaults) agent_config.agents.defaults = {};
       if (!agent_config.agents.defaults.model) agent_config.agents.defaults.model = {};
 
+      // Update omniroute provider
       const apiKey = auth.omniroute?.key;
       agent_config.models.providers.omniroute = {
         baseUrl: "http://192.168.0.51:20128/v1",
