@@ -510,20 +510,27 @@ async function syncInteractive() {
       if (!opencode_config.models.providers)
         opencode_config.models.providers = {};
 
+      // OpenCode uses omniroute/ format (not or/)
+      const opencodeModels = totalModels.map((m) => ({
+        id: m.id.replace(/^or\//, "omniroute/"),
+        name: m.name,
+      }));
+
       const apiKey = auth.omniroute?.key;
       opencode_config.models.providers.omniroute = {
         baseUrl: "http://192.168.0.51:20128/v1",
         apiKey: apiKey,
         api: "openai-completions",
-        models: totalModels,
+        models: opencodeModels,
       };
 
       // Update agents.defaults.models to include all synced models (whitelist for dropdown)
+      // OpenCode uses omniroute/ format
       if (!opencode_config.agents) opencode_config.agents = {};
       if (!opencode_config.agents.defaults) opencode_config.agents.defaults = {};
       if (!opencode_config.agents.defaults.models) opencode_config.agents.defaults.models = {};
 
-      totalModels.forEach((m) => {
+      opencodeModels.forEach((m) => {
         opencode_config.agents.defaults.models[m.id] = {};
       });
 
